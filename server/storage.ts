@@ -31,6 +31,7 @@ import { eq, and, desc, gte, lte } from "drizzle-orm";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateProfile(userId: string, profile: { hunterName: string; hunterClass: string }): Promise<User>;
   updateUserXp(userId: string, xpGained: number): Promise<User>;
   updateUserStreak(userId: string): Promise<User>;
 
@@ -99,6 +100,19 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async updateProfile(userId: string, profile: { hunterName: string; hunterClass: string }): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        hunterName: profile.hunterName,
+        hunterClass: profile.hunterClass,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
   }
 
   async updateUserXp(userId: string, xpGained: number): Promise<User> {

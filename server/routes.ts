@@ -6,6 +6,7 @@ import {
   insertQuestSchema,
   insertMissionSchema,
   insertDailyHuntSchema,
+  updateProfileSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(
@@ -22,6 +23,18 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.patch("/api/auth/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const parsed = updateProfileSchema.parse(req.body);
+      const user = await storage.updateProfile(userId, parsed);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(400).json({ message: "Failed to update profile" });
     }
   });
 

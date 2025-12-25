@@ -23,6 +23,10 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
+// Hunter classes
+export const hunterClasses = ["Fighter", "Mage", "Assassin", "Healer", "Tank", "Ranger"] as const;
+export type HunterClass = typeof hunterClasses[number];
+
 // Users table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -31,6 +35,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   hunterName: varchar("hunter_name"),
+  hunterClass: varchar("hunter_class").default("Fighter"),
   level: integer("level").default(1).notNull(),
   currentXp: integer("current_xp").default(0).notNull(),
   totalXp: integer("total_xp").default(0).notNull(),
@@ -160,6 +165,10 @@ export const missionsRelations = relations(missions, ({ one, many }) => ({
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
+export const updateProfileSchema = z.object({
+  hunterName: z.string().min(1).max(30),
+  hunterClass: z.enum(hunterClasses),
+});
 export const insertQuestSchema = createInsertSchema(quests).omit({ id: true, createdAt: true });
 export const insertMissionSchema = createInsertSchema(missions).omit({ id: true, createdAt: true });
 export const insertDailyHuntSchema = createInsertSchema(dailyHunts).omit({ id: true, createdAt: true });
